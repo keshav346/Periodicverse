@@ -1,0 +1,8 @@
+{
+  "name": "PeriodicVerse",
+  "description": "A futuristic, interactive educational website featuring an advanced periodic table, 3D atom models, and AI-powered chemistry learning tools.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
