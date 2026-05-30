@@ -31,6 +31,8 @@ const elementsData: Record<string, { symbol: string, category: string, valence: 
   sulfur: { symbol: 'S', category: 'nonmetal', valence: [2] },
   nitrogen: { symbol: 'N', category: 'nonmetal', valence: [3] },
   carbon: { symbol: 'C', category: 'nonmetal', valence: [4] },
+  phosphorus: { symbol: 'P', category: 'nonmetal', valence: [3, 5] },
+  silicon: { symbol: 'Si', category: 'metalloid', valence: [4] },
 
   iron: { symbol: 'Fe', category: 'transition metal', valence: [2, 3] },
   copper: { symbol: 'Cu', category: 'transition metal', valence: [1, 2] },
@@ -38,9 +40,16 @@ const elementsData: Record<string, { symbol: string, category: string, valence: 
   silver: { symbol: 'Ag', category: 'transition metal', valence: [1] },
   gold: { symbol: 'Au', category: 'transition metal', valence: [3] },
   platinum: { symbol: 'Pt', category: 'transition metal', valence: [2, 4] },
+  nickel: { symbol: 'Ni', category: 'transition metal', valence: [2] },
+  cobalt: { symbol: 'Co', category: 'transition metal', valence: [2, 3] },
+  manganese: { symbol: 'Mn', category: 'transition metal', valence: [2, 4, 7] },
+  chromium: { symbol: 'Cr', category: 'transition metal', valence: [2, 3, 6] },
+  titanium: { symbol: 'Ti', category: 'transition metal', valence: [4] },
+
   aluminum: { symbol: 'Al', category: 'post-transition metal', valence: [3] },
   gallium: { symbol: 'Ga', category: 'post-transition metal', valence: [3] },
-  lead: { symbol: 'Pb', category: 'post-transition metal', valence: [2, 4] }
+  lead: { symbol: 'Pb', category: 'post-transition metal', valence: [2, 4] },
+  tin: { symbol: 'Sn', category: 'post-transition metal', valence: [2, 4] }
 };
 
 // Halogens typically exist as diatomic molecules F2, Cl2, Br2, I2.
@@ -155,6 +164,28 @@ export function simulateReaction(reactants: {name: string, quantity: number}[], 
     };
   }
 
+  if (elementStr === "phosphorus-sulfur") {
+    const pQty = getQty("phosphorus");
+    const sQty = getQty("sulfur");
+    if (pQty === 4 && sQty === 10) {
+      return {
+        reactionOccurred: true,
+        productName: "Phosphorus Pentasulfide (P₄S₁₀)",
+        chemicalEquation: "4P + 10S → P₄S₁₀",
+        explanation: "Phosphorus and sulfur react to form phosphorus pentasulfide, used in the production of pesticides and matches.",
+        bondsFormed: ["Covalent P-S"],
+        reactionType: "exothermic"
+      };
+    }
+    return {
+      reactionOccurred: false,
+      productName: "Stoichiometry Mismatch",
+      chemicalEquation: "",
+      explanation: `Phosphorus and sulfur commonly form P₄S₁₀. This requires a 4:10 ratio of P to S. You provided ${pQty} P and ${sQty} S.`,
+      bondsFormed: []
+    };
+  }
+
   if (elementStr === "hydrogen-nitrogen") {
     const nQty = getQty("nitrogen");
     const hQty = getQty("hydrogen");
@@ -214,8 +245,241 @@ export function simulateReaction(reactants: {name: string, quantity: number}[], 
     };
   }
 
+  if (elementStr === "calcium-carbon-oxygen") {
+    return {
+      reactionOccurred: true,
+      productName: "Calcium Carbonate (CaCO₃)",
+      chemicalEquation: "2Ca + 2C + 3O₂ → 2CaCO₃",
+      explanation: "Calcium reacts with carbon and oxygen at high temperatures to form calcium carbonate, the main component of limestone, shells, and chalk. This is a complex reaction typically involving intermediate oxides.",
+      bondsFormed: ["Ionic Ca²⁺ - [CO₃]²⁻", "Covalent C-O"],
+      reactionType: "exothermic"
+    };
+  }
+
+  if (elementStr === "hydrogen-oxygen-sulfur") {
+    return {
+      reactionOccurred: true,
+      productName: "Sulfuric Acid (H₂SO₄)",
+      chemicalEquation: "2S + 3O₂ + 2H₂O → 2H₂SO₄",
+      explanation: "Sulfur, oxygen, and hydrogen (in the form of water) react to form sulfuric acid, a highly corrosive strong acid. This is an oversimplified summary of the contact process.",
+      bondsFormed: ["Covalent S=O", "Covalent S-O-H"],
+      reactionType: "exothermic"
+    };
+  }
+
+  if (elementStr === "carbon-hydrogen-oxygen") {
+    return {
+      reactionOccurred: true,
+      productName: "Glucose (C₆H₁₂O₆)",
+      chemicalEquation: "6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂",
+      explanation: "In nature, carbon dioxide and water (comprising carbon, hydrogen, and oxygen) are synthesized into glucose through photosynthesis using sunlight energy. This is an endothermic process.",
+      bondsFormed: ["Covalent C-C", "Covalent C-H", "Covalent C-O"],
+      reactionType: "endothermic"
+    };
+  }
+
+  if (elementStr === "nitrogen-oxygen-sodium") {
+    return {
+      reactionOccurred: true,
+      productName: "Sodium Nitrate (NaNO₃)",
+      chemicalEquation: "2Na + N₂ + 3O₂ → 2NaNO₃",
+      explanation: "Sodium reacts with nitrogen and oxygen to form sodium nitrate, a highly soluble salt used in fertilizers and explosives.",
+      bondsFormed: ["Ionic Na⁺ - [NO₃]⁻", "Covalent N-O"],
+      reactionType: "exothermic"
+    };
+  }
+
+  if (elementStr === "chlorine-hydrogen") {
+    return {
+      reactionOccurred: true,
+      productName: "Hydrochloric Acid (HCl)",
+      chemicalEquation: "H₂ + Cl₂ → 2HCl",
+      explanation: "Hydrogen gas reacts with chlorine gas, especially in the presence of UV light, to form hydrogen chloride gas, which dissolves in water to become hydrochloric acid.",
+      bondsFormed: ["Covalent H-Cl (Polar)"],
+      reactionType: "exothermic"
+    };
+  }
+
+  if (elementStr === "hydrogen-sulfur") {
+    return {
+      reactionOccurred: true,
+      productName: "Hydrogen Sulfide (H₂S)",
+      chemicalEquation: "H₂ + S → H₂S",
+      explanation: "Hydrogen reacts with molten sulfur to form hydrogen sulfide, a toxic gas with a characteristic foul odor of rotten eggs.",
+      bondsFormed: ["Covalent H-S"],
+      reactionType: "exothermic"
+    };
+  }
+
+  if (elementStr === "hydrogen-nitrogen-oxygen") {
+    return {
+      reactionOccurred: true,
+      productName: "Nitric Acid (HNO₃)",
+      chemicalEquation: "2H₂O + 4NO₂ + O₂ → 4HNO₃",
+      explanation: "Nitrogen dioxide, oxygen, and water react to form nitric acid. This happens in the atmosphere to form acid rain and in industrial production via the Ostwald process.",
+      bondsFormed: ["Covalent N-O", "Covalent O-H"],
+      reactionType: "exothermic"
+    };
+  }
+
+  if (elementStr === "carbon-oxygen-sodium") {
+    return {
+      reactionOccurred: true,
+      productName: "Sodium Carbonate (Na₂CO₃)",
+      chemicalEquation: "4Na + 3O₂ + 2C → 2Na₂CO₃",
+      explanation: "Sodium reacts with carbon and oxygen to form sodium carbonate (washing soda).",
+      bondsFormed: ["Ionic Na⁺ - [CO₃]²⁻", "Covalent C-O"],
+      reactionType: "exothermic"
+    };
+  }
+
+  if (elementStr === "carbon-hydrogen") {
+    return {
+      reactionOccurred: true,
+      productName: "Methane (CH₄)",
+      chemicalEquation: "C + 2H₂ → CH₄",
+      explanation: "Carbon reacts with hydrogen under specific catalysts and high pressure to form methane, the simplest alkane and main component of natural gas.",
+      bondsFormed: ["Covalent C-H"],
+      reactionType: "exothermic"
+    };
+  }
+
+  if (elementStr === "chlorine-oxygen-sodium") {
+    return {
+      reactionOccurred: true,
+      productName: "Sodium Hypochlorite (NaClO)",
+      chemicalEquation: "2NaOH + Cl₂ → NaCl + NaClO + H₂O",
+      explanation: "When chlorine gas reacts with a cold, dilute solution of sodium hydroxide (comprising sodium, oxygen, and hydrogen), sodium hypochlorite (the active ingredient in bleach) is formed. Adding sodium, chlorine, and oxygen can conceptually yield this salt.",
+      bondsFormed: ["Ionic Na⁺ - [ClO]⁻", "Covalent Cl-O"],
+      reactionType: "exothermic"
+    };
+  }
+
+  if (elementStr === "carbon-copper-oxygen") {
+    return {
+      reactionOccurred: true,
+      productName: "Copper(II) Carbonate (CuCO₃)",
+      chemicalEquation: "2Cu + O₂ + CO₂ + H₂O → Cu₂(OH)₂CO₃",
+      explanation: "Over a long period, copper reacts with carbon dioxide and oxygen (and moisture) to form basic copper carbonate, which is the green patina seen on old copper roofs and the Statue of Liberty.",
+      bondsFormed: ["Ionic Cu²⁺ - [CO₃]²⁻", "Covalent C-O"],
+      reactionType: "exothermic"
+    };
+  }
+
+  if (elementStr === "hydrogen-iron-oxygen") {
+    return {
+      reactionOccurred: true,
+      productName: "Iron(III) Hydroxide / Rust (Fe(OH)₃)",
+      chemicalEquation: "4Fe + 3O₂ + 6H₂O → 4Fe(OH)₃",
+      explanation: "Iron undergoes an oxidation-reduction reaction in the presence of oxygen and water (contains hydrogen and oxygen) to form rust.",
+      bondsFormed: ["Ionic Fe³⁺ - [OH]⁻", "Covalent O-H"],
+      reactionType: "exothermic"
+    };
+  }
+
   // 2. Generalized Rule Engine (Handles realistic permutations dynamically)
   
+  if (elementStr === "calcium-carbon-hydrogen-oxygen") {
+    const caQty = getQty("calcium");
+    const cQty = getQty("carbon");
+    const hQty = getQty("hydrogen");
+    const oQty = getQty("oxygen");
+
+    if (caQty === 1 && cQty === 2 && hQty === 2 && oQty === 6) {
+      return {
+        reactionOccurred: true,
+        productName: "Calcium Bicarbonate (Ca(HCO₃)₂)",
+        chemicalEquation: "Ca + 2C + H₂ + 3O₂ → Ca(HCO₃)₂",
+        explanation: "Calcium, carbon, hydrogen, and oxygen can form calcium bicarbonate. In nature, it forms when water containing dissolved carbon dioxide reacts with calcium carbonate.",
+        bondsFormed: ["Ionic Ca²⁺ - [HCO₃]⁻", "Covalent C-O", "Covalent O-H"],
+        reactionType: "exothermic"
+      };
+    }
+  }
+
+  if (elementStr === "carbon-hydrogen-oxygen-sodium") {
+    const naQty = getQty("sodium");
+    const cQty = getQty("carbon");
+    const hQty = getQty("hydrogen");
+    const oQty = getQty("oxygen");
+    if (naQty === 1 && cQty === 1 && hQty === 1 && oQty === 3) {
+      return {
+        reactionOccurred: true,
+        productName: "Sodium Bicarbonate (NaHCO₃)",
+        chemicalEquation: "Na + C + H + 3O → NaHCO₃",
+        explanation: "Sodium, carbon, hydrogen, and oxygen form Sodium Bicarbonate, commonly known as baking soda.",
+        bondsFormed: ["Ionic Na⁺ - [HCO₃]⁻", "Covalent C-O", "Covalent O-H"],
+        reactionType: "exothermic"
+      };
+    }
+  }
+
+  if (elementStr === "copper-oxygen-sulfur") {
+    return {
+      reactionOccurred: true,
+      productName: "Copper(II) Sulfate (CuSO₄)",
+      chemicalEquation: "Cu + S + 2O₂ → CuSO₄",
+      explanation: "Copper, sulfur, and oxygen can form Copper(II) Sulfate, a bright blue crystalline solid.",
+      bondsFormed: ["Ionic Cu²⁺ - [SO₄]²⁻", "Covalent S-O"],
+      reactionType: "exothermic"
+    };
+  }
+
+  if (elementStr === "calcium-oxygen-sulfur") {
+    return {
+      reactionOccurred: true,
+      productName: "Calcium Sulfate (CaSO₄)",
+      chemicalEquation: "Ca + S + 2O₂ → CaSO₄",
+      explanation: "Calcium, sulfur, and oxygen form Calcium Sulfate, which is the main component of plaster and gypsum.",
+      bondsFormed: ["Ionic Ca²⁺ - [SO₄]²⁻", "Covalent S-O"],
+      reactionType: "exothermic"
+    };
+  }
+
+  if (elementStr === "nitrogen-oxygen-potassium") {
+    return {
+      reactionOccurred: true,
+      productName: "Potassium Nitrate (KNO₃)",
+      chemicalEquation: "2K + N₂ + 3O₂ → 2KNO₃",
+      explanation: "Potassium, nitrogen, and oxygen can form Potassium Nitrate, known as saltpeter, historically used in gunpowder.",
+      bondsFormed: ["Ionic K⁺ - [NO₃]⁻", "Covalent N-O"],
+      reactionType: "exothermic"
+    };
+  }
+
+  if (elementStr === "hydrogen-oxygen-phosphorus") {
+    return {
+      reactionOccurred: true,
+      productName: "Phosphoric Acid (H₃PO₄)",
+      chemicalEquation: "4P + 5O₂ + 6H₂O → 4H₃PO₄",
+      explanation: "Phosphorus, oxygen, and hydrogen form Phosphoric Acid, used in fertilizers and soft drinks.",
+      bondsFormed: ["Covalent P=O", "Covalent P-O-H"],
+      reactionType: "exothermic"
+    };
+  }
+
+  if (elementStr === "hydrogen-oxygen-potassium") {
+    return {
+      reactionOccurred: true,
+      productName: "Potassium Hydroxide (KOH)",
+      chemicalEquation: "2K + 2H₂O → 2KOH + H₂",
+      explanation: "Potassium reacts vigorously with water (hydrogen and oxygen) to form Potassium Hydroxide.",
+      bondsFormed: ["Ionic K⁺ - [OH]⁻", "Covalent O-H"],
+      reactionType: "exothermic"
+    };
+  }
+
+  if (elementStr === "chlorine-hydrogen-oxygen") {
+    return {
+       reactionOccurred: true,
+       productName: "Perchloric Acid (HClO₄)",
+       chemicalEquation: "H₂ + Cl₂ + 4O₂ → 2HClO₄",
+       explanation: "Hydrogen, chlorine, and oxygen can form Perchloric Acid, a highly corrosive and oxidizing strong acid.",
+       bondsFormed: ["Covalent Cl-O", "Covalent O-H"],
+       reactionType: "exothermic"
+    };
+  }
+
   // Grab element categories if available
   const el1 = elementsData[uniqueReactantNames[0]];
   const el2 = elementsData[uniqueReactantNames[1]];
@@ -308,6 +572,236 @@ export function simulateReaction(reactants: {name: string, quantity: number}[], 
            bondsFormed: [`Ionic ${metal.symbol}⁺-O²⁻`],
            reactionType: "exothermic"
         };
+    }
+    // Nonmetal + Halogen
+    const isNm1 = el1.category.includes('nonmetal') || el1.category.includes('metalloid');
+    const isNm2 = el2.category.includes('nonmetal') || el2.category.includes('metalloid');
+    
+    if ((isNm1 && isH2) || (isNm2 && isH1)) {
+       const nonmetal = isNm1 ? el1 : el2;
+       const halogen = isNm1 ? el2 : el1;
+       
+       // Avoid matching if both are halogens or hydrogen (handled differently or skip)
+       if (nonmetal.symbol !== halogen.symbol && nonmetal.symbol !== 'H' && nonmetal.symbol !== 'O') {
+         const nmValence = nonmetal.valence[nonmetal.valence.length - 1]; // Use highest valence for now
+         const productFormula = `${nonmetal.symbol}${halogen.symbol}${getSubscript(nmValence)}`;
+         
+         return {
+           reactionOccurred: true,
+           productName: `${nonmetal.symbol} Halide`,
+           chemicalEquation: `2${nonmetal.symbol} + ${nmValence}${halogen.symbol}₂ → 2${productFormula}`,
+           explanation: `${nonmetal.symbol} reacts covalently with ${halogen.symbol} to form a molecular halide.`,
+           bondsFormed: [`Covalent ${nonmetal.symbol}-${halogen.symbol}`],
+           reactionType: "exothermic"
+         };
+       }
+    }
+
+    // Nonmetal + Oxygen (excluding hydrogen and carbon which are handled above, and oxygen itself)
+    if ((isNm1 && isO2) || (isNm2 && isO1)) {
+        const nonmetal = isNm1 ? el1 : el2;
+        if (nonmetal.symbol !== 'O' && nonmetal.symbol !== 'C' && nonmetal.symbol !== 'H' && nonmetal.symbol !== 'N') {
+            const nmValence = nonmetal.valence[nonmetal.valence.length - 1];
+            
+            let productFormula = "";
+            let equation = "";
+            if (nmValence === 2) {
+               productFormula = `${nonmetal.symbol}O`;
+               equation = `2${nonmetal.symbol} + O₂ → 2${productFormula}`;
+            } else if (nmValence === 3) {
+               productFormula = `${nonmetal.symbol}₂O₃`;
+               equation = `4${nonmetal.symbol} + 3O₂ → 2${productFormula}`;
+            } else if (nmValence === 4) {
+               productFormula = `${nonmetal.symbol}O₂`;
+               equation = `${nonmetal.symbol} + O₂ → ${productFormula}`;
+            } else if (nmValence === 5) {
+               productFormula = `${nonmetal.symbol}₂O₅`;
+               equation = `4${nonmetal.symbol} + 5O₂ → 2${productFormula}`;
+            } else if (nmValence === 6) {
+               productFormula = `${nonmetal.symbol}O₃`;
+               equation = `2${nonmetal.symbol} + 3O₂ → 2${productFormula}`;
+            } else {
+               productFormula = `${nonmetal.symbol}O_{x}`;
+               equation = `${nonmetal.symbol} + Oxygen → ${productFormula}`;
+            }
+            
+            return {
+               reactionOccurred: true,
+               productName: `${nonmetal.symbol} Oxide`,
+               chemicalEquation: equation,
+               explanation: `${nonmetal.symbol} reacts with Oxygen to form a covalent network or molecular oxide.`,
+               bondsFormed: [`Covalent ${nonmetal.symbol}-O`],
+               reactionType: "exothermic"
+            };
+        }
+    }
+    // Generic Nonmetal + Nonmetal
+    if (isNm1 && isNm2 && !isO1 && !isO2 && !isH1 && !isH2) {
+       // Since it's a fallback and not specifically halogens/oxygen
+       // Example: P + S, C + S -> CS2, etc.
+       const nm1 = el1;
+       const nm2 = el2;
+       
+       if (nm1.symbol !== nm2.symbol && nm1.symbol !== 'H' && nm2.symbol !== 'H') {
+           const val1 = nm1.valence[nm1.valence.length - 1] || 1;
+           const val2 = nm2.valence[nm2.valence.length - 1] || 1;
+           
+           // Super simplified formula building
+           let productFormula = "";
+           if (val1 === val2) {
+               productFormula = `${nm1.symbol}${nm2.symbol}`;
+           } else {
+               productFormula = `${nm1.symbol}${getSubscript(val2)}${nm2.symbol}${getSubscript(val1)}`;
+           }
+
+           return {
+               reactionOccurred: true,
+               productName: `Covalent ${nm1.symbol}-${nm2.symbol} Compound`,
+               chemicalEquation: `${val2}${nm1.symbol} + ${val1}${nm2.symbol} → ${productFormula}`,
+               explanation: `${nm1.symbol} and ${nm2.symbol} can bond covalently to form a resulting molecular compound. Note: Stoichiometry can vary significantly based on reaction conditions.`,
+               bondsFormed: [`Covalent ${nm1.symbol}-${nm2.symbol}`],
+               reactionType: "exothermic"
+           };
+       }
+    }
+  }
+
+  if (uniqueReactantNames.length === 3) {
+    const el1 = elementsData[uniqueReactantNames[0]];
+    const el2 = elementsData[uniqueReactantNames[1]];
+    const el3 = elementsData[uniqueReactantNames[2]];
+
+    if (el1 && el2 && el3) {
+      const isMetal = (el: any) => el.category.includes('metal') && !el.category.includes('nonmetal');
+      const isHalogen = (el: any) => el.category === 'halogen';
+      
+      const elements = [el1, el2, el3];
+      const metal = elements.find(isMetal);
+      const hydrogen = elements.find(el => el.symbol === 'H');
+      const halogen = elements.find(isHalogen);
+      const oxygen = elements.find(el => el.symbol === 'O');
+      const carbon = elements.find(el => el.symbol === 'C');
+      const sulfur = elements.find(el => el.symbol === 'S');
+      const nitrogen = elements.find(el => el.symbol === 'N');
+
+      // Metal + Acid (Hydrogen + Halogen, e.g., HCl)
+      if (metal && hydrogen && halogen) {
+        // Exclude noble metals from reacting with simple acids easily
+        if (['Au', 'Pt', 'Ag', 'Cu'].includes(metal.symbol)) {
+          return {
+            reactionOccurred: false,
+            productName: "No reaction",
+            chemicalEquation: "",
+            explanation: `${metal.symbol} is relatively unreactive and does not easily displace hydrogen from acids like H${halogen.symbol}.`,
+            bondsFormed: []
+          };
+        }
+
+        const mId = metal.symbol;
+        const hId = halogen.symbol;
+        const mValence = metal.valence[0];
+        
+        const productFormula = mValence === 1 ? `${mId}${hId}` : `${mId}${hId}${getSubscript(mValence)}`;
+        
+        let equation = "";
+        if (mValence === 1) {
+          equation = `2${mId} + 2H${hId} → 2${productFormula} + H₂`;
+        } else if (mValence === 2) {
+          equation = `${mId} + 2H${hId} → ${productFormula} + H₂`;
+        } else {
+          equation = `2${mId} + 6H${hId} → 2${productFormula} + 3H₂`;
+        }
+
+        return {
+          reactionOccurred: true,
+          productName: `${metal.symbol} Halide and Hydrogen Gas`,
+          chemicalEquation: equation,
+          explanation: `The metal (${metal.symbol}) reacts with the acid (H${halogen.symbol}) in a single displacement reaction. The metal displaces hydrogen, forming a metal halide salt and releasing hydrogen gas.`,
+          bondsFormed: [`Ionic ${metal.symbol}⁺-${halogen.symbol}⁻`, `Covalent H-H`],
+          reactionType: "exothermic"
+        };
+      }
+
+      // Complex Oxides: Metal Carbonate, Sulfate, Nitrate
+      if (metal && oxygen) {
+        const mId = metal.symbol;
+        const mValence = metal.valence[0];
+
+        // Metal Carbonate (Metal + Carbon + Oxygen)
+        if (carbon) {
+           let productFormula = "";
+           let equation = "";
+           if (mValence === 1) { // Na2CO3
+             productFormula = `${mId}₂CO₃`;
+             equation = `4${mId} + 2C + 3O₂ → 2${productFormula}`;
+           } else if (mValence === 2) { // CaCO3
+             productFormula = `${mId}CO₃`;
+             equation = `2${mId} + 2C + 3O₂ → 2${productFormula}`;
+           } else if (mValence === 3) { // Al2(CO3)3
+             productFormula = `${mId}₂(CO₃)₃`;
+             equation = `4${mId} + 6C + 9O₂ → 2${productFormula}`;
+           }
+
+           return {
+             reactionOccurred: true,
+             productName: `Metal Carbonate (${productFormula})`,
+             chemicalEquation: equation,
+             explanation: `${metal.symbol} reacts with carbon and oxygen to form a metal carbonate. This represents a complex oxidation forming ionic bonds between the metal cation and the carbonate polyatomic anion.`,
+             bondsFormed: [`Ionic ${metal.symbol}⁺ - [CO₃]²⁻`, `Covalent C-O`],
+             reactionType: "exothermic"
+           };
+        }
+
+        // Metal Sulfate (Metal + Sulfur + Oxygen)
+        if (sulfur) {
+           let productFormula = "";
+           let equation = "";
+           if (mValence === 1) { // Na2SO4
+             productFormula = `${mId}₂SO₄`;
+             equation = `2${mId} + S + 2O₂ → ${productFormula}`;
+           } else if (mValence === 2) { // CaSO4
+             productFormula = `${mId}SO₄`;
+             equation = `${mId} + S + 2O₂ → ${productFormula}`;
+           } else if (mValence === 3) { // Al2(SO4)3
+             productFormula = `${mId}₂(SO₄)₃`;
+             equation = `2${mId} + 3S + 6O₂ → ${productFormula}`;
+           }
+
+           return {
+             reactionOccurred: true,
+             productName: `Metal Sulfate (${productFormula})`,
+             chemicalEquation: equation,
+             explanation: `${metal.symbol} reacts with sulfur and oxygen to form a metal sulfate. The sulfate ion is a polyatomic anion that forms strong ionic bonds with the metal cation.`,
+             bondsFormed: [`Ionic ${metal.symbol}⁺ - [SO₄]²⁻`, `Covalent S-O`],
+             reactionType: "exothermic"
+           };
+        }
+
+        // Metal Nitrate (Metal + Nitrogen + Oxygen)
+        if (nitrogen) {
+           let productFormula = "";
+           let equation = "";
+           if (mValence === 1) { // NaNO3
+             productFormula = `${mId}NO₃`;
+             equation = `2${mId} + N₂ + 3O₂ → 2${productFormula}`;
+           } else if (mValence === 2) { // Ca(NO3)2
+             productFormula = `${mId}(NO₃)₂`;
+             equation = `${mId} + N₂ + 3O₂ → ${productFormula}`;
+           } else if (mValence === 3) { // Al(NO3)3
+             productFormula = `${mId}(NO₃)₃`;
+             equation = `4${mId} + 6N₂ + 18O₂ → 4${productFormula}`;
+           }
+
+           return {
+             reactionOccurred: true,
+             productName: `Metal Nitrate (${productFormula})`,
+             chemicalEquation: equation,
+             explanation: `${metal.symbol} reacts with nitrogen and oxygen to form a metal nitrate. Nitrates are highly soluble salts containing the nitrate polyatomic ion.`,
+             bondsFormed: [`Ionic ${metal.symbol}⁺ - [NO₃]⁻`, `Covalent N-O`],
+             reactionType: "exothermic"
+           };
+        }
+      }
     }
   }
 

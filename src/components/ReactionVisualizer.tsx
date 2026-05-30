@@ -1,5 +1,5 @@
 import React, { useRef, useMemo, useEffect } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Sphere, Cylinder, Stars, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { ElementData } from '../types';
@@ -9,6 +9,7 @@ interface ReactionVisualizerProps {
   reactants: ElementData[];
   reactionOccurred: boolean;
   bondsFormed?: string[];
+  temperature?: number;
 }
 
 // Basic CPK coloring mapping
@@ -38,7 +39,13 @@ function getAtomColor(symbol: string, category: string) {
   return '#909090'; // Default gray
 }
 
-export default function ReactionVisualizer({ reactants, reactionOccurred, bondsFormed }: ReactionVisualizerProps) {
+function CustomOrbitControls(props: any) {
+  const { gl } = useThree();
+  const domElement = gl.domElement.parentElement || gl.domElement;
+  return <OrbitControls domElement={domElement} {...props} />;
+}
+
+export default function ReactionVisualizer({ reactants, reactionOccurred, bondsFormed, temperature }: ReactionVisualizerProps) {
   // If no reactants, don't render canvas
   if (reactants.length === 0) return null;
 
@@ -51,16 +58,18 @@ export default function ReactionVisualizer({ reactants, reactionOccurred, bondsF
         
         <Stars radius={50} depth={50} count={500} factor={2} fade speed={0.5} />
         
-        <Scene reactants={reactants} reactionOccurred={reactionOccurred} bondsFormed={bondsFormed} />
+        <Scene reactants={reactants} reactionOccurred={reactionOccurred} bondsFormed={bondsFormed} temperature={temperature} />
         
-        <OrbitControls enablePan={true} autoRotate={reactionOccurred} autoRotateSpeed={2} maxDistance={20} minDistance={2} />
+        <CustomOrbitControls makeDefault enablePan={true} autoRotate={reactionOccurred} autoRotateSpeed={2} maxDistance={20} minDistance={2} />
       </Canvas>
     </div>
   );
 }
 
-function Scene({ reactants, reactionOccurred, bondsFormed }: { reactants: ElementData[], reactionOccurred: boolean, bondsFormed?: string[] }) {
+function Scene({ reactants, reactionOccurred, bondsFormed, temperature }: { reactants: ElementData[], reactionOccurred: boolean, bondsFormed?: string[], temperature?: number }) {
   const groupRef = useRef<THREE.Group>(null);
+  
+  const reactantsKey = reactants.map(r => r.symbol).sort().join('-');
   
   // Create stable positions and properties for the atoms
   const atoms = useMemo(() => {
@@ -131,7 +140,8 @@ function Scene({ reactants, reactionOccurred, bondsFormed }: { reactants: Elemen
         currentPos: new THREE.Vector3(uX, uY, uZ),
       };
     });
-  }, [reactants]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reactantsKey]);
 
   // Generate bonds (just simple lines between atoms if reacted)
   const bonds = useMemo(() => {
@@ -177,7 +187,7 @@ function Scene({ reactants, reactionOccurred, bondsFormed }: { reactants: Elemen
           : 'covalent';
         
         return (
-          <BohrBond key={'bond' + idx} atomA={atoms[bond[0]]} atomB={atoms[bond[1]]} bondType={bondType} active={reactionOccurred} />
+          <BohrBond key={'bond' + idx} atomA={atoms[bond[0]]} atomB={atoms[bond[1]]} bondType={bondType} active={reactionOccurred} temperature={temperature} />
         );
       })}
     </group>
@@ -251,7 +261,7 @@ function ElectronShell({ radius, count, index }: { radius: number, count: number
   );
 }
 
-function BohrBond({ atomA, atomB, bondType, active }: { atomA: any, atomB: any, bondType: string, active: boolean }) {
+function BohrBond({ atomA, atomB, bondType, active, temperature = 298 }: { atomA: any, atomB: any, bondType: string, active: boolean, temperature?: number }) {
   const groupRef = useRef<THREE.Group>(null);
   const materialRef = useRef<THREE.MeshStandardMaterial>(null);
   const covalentElectronGroupRef = useRef<THREE.Group>(null);
@@ -264,6 +274,17 @@ function BohrBond({ atomA, atomB, bondType, active }: { atomA: any, atomB: any, 
   const progress = useRef(0);
   const velocity = useRef(0);
   const migrationProgress = useRef(0);
+  
+  const prevTemp = useRef(temperature);
+  const rippleStart = useRef(-1);
+
+  useEffect(() => {
+    if (temperature !== prevTemp.current) {
+        rippleStart.current = performance.now() / 1000;
+        prevTemp.current = temperature;
+    }
+  }, [temperature]);
+
   const [shatterParts, setShatterParts] = React.useState<any[]>([]);
   const [sparkParts, setSparkParts] = React.useState<any[]>([]);
 
@@ -327,6 +348,9 @@ function BohrBond({ atomA, atomB, bondType, active }: { atomA: any, atomB: any, 
   
   const textGroupRef = useRef<THREE.Group>(null);
   const textMeshRef = useRef<any>(null);
+  
+  const rippleMeshRef = useRef<THREE.Mesh>(null);
+  const rippleMaterialRef = useRef<THREE.MeshBasicMaterial>(null);
 
   useFrame((state, delta) => {
     const posA = atomA.currentPos;
@@ -417,14 +441,7 @@ function BohrBond({ atomA, atomB, bondType, active }: { atomA: any, atomB: any, 
       const displayMidpoint = midpoint.clone();
       
       if (mp >= 1 && progress.current > 0.5) {
-        const time = state.clock.elapsedTime;
-        const intensity = Math.min((progress.current - 0.5) * 2, 1);
-        const vibX = Math.sin(time * 50) * 0.015;
-        const vibY = Math.cos(time * 45) * 0.015;
-        const vibZ = Math.sin(time * 55) * 0.015;
-        displayMidpoint.x += vibX * intensity;
-        displayMidpoint.y += vibY * intensity;
-        displayMidpoint.z += vibZ * intensity;
+        // Render stable without vibration
       }
 
       groupRef.current.position.copy(displayMidpoint);
@@ -463,8 +480,42 @@ function BohrBond({ atomA, atomB, bondType, active }: { atomA: any, atomB: any, 
       if (materialRef.current) {
          const eDiff = Math.abs((atomA.electronegativity || 2) - (atomB.electronegativity || 2));
          const baseStrength = isIonic ? (eDiff + 0.5) : (2.5 - eDiff);
+         
+         const currentTime = performance.now() / 1000;
+         let rippleMultiplier = 1;
+         
+         if (rippleStart.current > 0) {
+           const timeSinceRipple = currentTime - rippleStart.current;
+           if (timeSinceRipple < 2) {
+             // A quick pulse that decays over 2 seconds
+             const ripplePulse = Math.sin(timeSinceRipple * Math.PI * 4) * Math.exp(-timeSinceRipple * 2);
+             rippleMultiplier = 1 + Math.max(0, ripplePulse) * 2;
+           } else {
+             rippleStart.current = -1; // Reset
+           }
+         }
+         
          const pulse = Math.sin(state.clock.elapsedTime * (3 + baseStrength)) * 0.3 + 0.7;
-         materialRef.current.emissiveIntensity = baseStrength * pulse * (mp >= 1 ? 1 : mp);
+         materialRef.current.emissiveIntensity = baseStrength * pulse * (mp >= 1 ? 1 : mp) * rippleMultiplier;
+         
+         // Optional: shift color slightly when rippling
+         if (rippleMultiplier > 1.2) {
+            materialRef.current.color.lerp(new THREE.Color('#ffffff'), 0.1);
+         } else {
+            materialRef.current.color.lerp(new THREE.Color(bondType === 'ionic' ? '#ab5cf2' : '#36f0db'), 0.05);
+         }
+         
+         if (rippleMeshRef.current && rippleMaterialRef.current) {
+             const timeSinceRipple = Math.max(0, currentTime - (rippleStart.current > 0 ? rippleStart.current : -100));
+             if (rippleStart.current > 0 && timeSinceRipple < 2) {
+                 rippleMeshRef.current.visible = true;
+                 const scaleOut = 1 + (timeSinceRipple * 4); // expands outwards
+                 rippleMeshRef.current.scale.set(scaleOut, 1, scaleOut);
+                 rippleMaterialRef.current.opacity = Math.max(0, (1 - timeSinceRipple * 0.5) * 0.5); // fade out
+             } else {
+                 rippleMeshRef.current.visible = false;
+             }
+         }
       }
     }
   });
@@ -474,7 +525,7 @@ function BohrBond({ atomA, atomB, bondType, active }: { atomA: any, atomB: any, 
   return (
     <>
       <group ref={groupRef} visible={active}>
-        <mesh className="BohrBond-component">
+        <mesh>
           <cylinderGeometry args={[0.04, 0.04, 1, 16]} />
           <meshStandardMaterial 
             ref={materialRef}
@@ -485,6 +536,18 @@ function BohrBond({ atomA, atomB, bondType, active }: { atomA: any, atomB: any, 
             metalness={0.8} 
             emissive={bondType === 'ionic' ? '#7423c4' : '#148da6'}
             emissiveIntensity={0.6}
+          />
+        </mesh>
+        <mesh ref={rippleMeshRef} visible={false}>
+          <cylinderGeometry args={[0.2, 0.2, 1, 16]} />
+          <meshBasicMaterial 
+            ref={rippleMaterialRef}
+            color={color}
+            transparent
+            opacity={0.5}
+            side={THREE.DoubleSide}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
           />
         </mesh>
       </group>

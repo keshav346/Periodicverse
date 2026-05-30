@@ -1,5 +1,5 @@
 import React, { useRef, useMemo } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Sphere, Line, Stars } from '@react-three/drei';
 import * as THREE from 'three';
 
@@ -143,6 +143,14 @@ function Nucleus({ color, protons }: { color: string, protons: number }) {
   );
 }
 
+function CustomOrbitControls(props: any) {
+  const { gl } = useThree();
+  // Provide the canvas parent wrapper as the event listener target,
+  // which fixes touch/zoom interaction (R3F Canvas has pointer-events: none on the canvas itself)
+  const domElement = gl.domElement.parentElement || gl.domElement;
+  return <OrbitControls domElement={domElement} {...props} />;
+}
+
 export default function Atom3D({ shells, color, modelType }: Atom3DProps) {
   // Use category color or default
   const baseColor = color || "#ef4444";
@@ -165,7 +173,7 @@ export default function Atom3D({ shells, color, modelType }: Atom3DProps) {
         
         {modelType === 'orbital' && <OrbitalModel shells={shells} />}
         
-        <OrbitControls enablePan={false} autoRotate autoRotateSpeed={0.5} maxDistance={20} minDistance={3} />
+        <CustomOrbitControls makeDefault enablePan={false} autoRotate autoRotateSpeed={0.5} maxDistance={20} minDistance={3} />
       </Canvas>
     </div>
   );

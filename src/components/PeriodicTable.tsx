@@ -5,13 +5,12 @@ import { motion, AnimatePresence } from 'motion/react';
 
 interface PeriodicTableProps {
   elements: ElementData[];
-  isAdvanced: boolean;
   onElementClick: (element: ElementData) => void;
   searchQuery?: string;
   activeCategory?: string;
 }
 
-export default function PeriodicTable({ elements, isAdvanced, onElementClick, searchQuery = "", activeCategory = "all" }: PeriodicTableProps) {
+export default function PeriodicTable({ elements, onElementClick, searchQuery = "", activeCategory = "all" }: PeriodicTableProps) {
   
   const isMatch = (el: ElementData) => {
     // Check Category
@@ -37,13 +36,13 @@ export default function PeriodicTable({ elements, isAdvanced, onElementClick, se
   };
 
   return (
-    <div className="w-full max-w-full overflow-x-auto pb-8 pt-4 px-2 sm:px-0 custom-scrollbar">
+    <div className="w-full max-w-full overflow-x-auto pb-8 pt-4 px-2 sm:px-0">
       <motion.div 
         layout
-        className="min-w-[800px] sm:min-w-[1000px] md:min-w-fit mx-auto grid gap-[2px] sm:gap-1 p-2 sm:p-4"
+        className="min-w-[800px] sm:min-w-[1000px] md:min-w-fit mx-auto grid gap-[2px] p-2"
         style={{
-          gridTemplateColumns: `repeat(${isAdvanced ? 32 : 18}, minmax(${isAdvanced ? '25px' : '35px'}, 1fr))`,
-          gridTemplateRows: `repeat(${isAdvanced ? 7 : 10}, minmax(45px, 1fr))`
+          gridTemplateColumns: `repeat(18, minmax(35px, 1fr))`,
+          gridTemplateRows: `repeat(10, minmax(45px, 1fr))`
         }}
       >
         <AnimatePresence>
@@ -55,7 +54,6 @@ export default function PeriodicTable({ elements, isAdvanced, onElementClick, se
               <ElementCard
                 key={el.number}
                 element={el}
-                isAdvanced={isAdvanced}
                 onClick={onElementClick}
                 isDimmed={needsDimming}
               />
